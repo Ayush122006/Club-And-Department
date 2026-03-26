@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Club & Department Performance Dashboard</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Background Animated Geometry -->
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="glass-header animate-fade-in"
+            style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="header-content">
+                <h1>🎓 Club & Department Management System</h1>
+                <p>Welcome, <span id="welcomeUser" style="color:var(--accent-cyan);font-weight:600;">User</span></p>
+            </div>
+            <button class="btn btn-glass animate-fade-in" onclick="toggleTheme()" id="themeToggleBtn"
+                style="position: fixed; top: 20px; right: 20px; padding: 10px; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; z-index: 9999; box-shadow: var(--glass-shadow);"
+                title="Toggle Theme">🌓</button>
+            <div style="display: flex; gap: 10px; align-items: center; margin-right: 60px; position: relative;">
+                <button class="btn btn-glass" onclick="toggleNotifications()" title="Notifications"
+                    style="padding: 10px; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; position: relative;">
+                    🔔
+                    <span
+                        style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.70rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</span>
+                </button>
+                <div id="notificationDropdown" class="glass-panel"
+                    style="display: none; position: absolute; top: 50px; right: 0; width: 320px; z-index: 1000; padding: 15px;">
+                    <h3
+                        style="font-size: 1rem; margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px; color: var(--text-main);">
+                        Notifications</h3>
+                    <ul class="newsList" style="text-align: left;">
+                        <li><span class="news-text" style="color: var(--text-main);">New Hackathon added by Coding
+                                Club!</span></li>
+                        <li><span class="news-text" style="color: var(--text-main);">Science Dept reached 500
+                                members.</span></li>
+                        <li><span class="news-text" style="color: var(--text-main);">Reminder: Submit weekly
+                                reports.</span></li>
+                    </ul>
+                </div>
+                <button class="btn btn-glass" onclick="logout()"
+                    style="padding: 10px 20px; font-size: 0.85rem;">Logout</button>
+            </div>
+        </header>
+
+        <nav class="topNav glass-nav animate-fade-in stagger-1">
+            <ul>
+                <li class="active-nav" onclick="showSection('overview', this)">Overview</li>
+                <li onclick="showSection('departments', this)">Departments</li>
+                <li onclick="showSection('clubs', this)">Clubs</li>
+                <li onclick="showSection('events', this)">Events</li>
+                <li onclick="showSection('leaderboard', this)">Leaderboard</li>
+                <li onclick="showSection('admin', this)">Admin</li>
+                <li onclick="showSection('reports', this)">Reports</li>
+                <li onclick="showSection('profile', this)">My Profile</li>
+            </ul>
+        </nav>
+
+        <main class="animate-fade-in stagger-2">
+            <!-- OVERVIEW SECTION -->
+            <section id="overview" class="active">
+                <h2 class="section-title">Performance Summary</h2>
+
+                <div class="cards">
+                    <div class="glass-card stat-card">
+                        <div class="card-icon">🏛️</div>
+                        <div>
+                            <h3>Total Departments</h3>
+                            <p id="totalDepartments" class="stat-number">0</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stat-card">
+                        <div class="card-icon">🏕️</div>
+                        <div>
+                            <h3>Total Clubs</h3>
+                            <p id="totalClubs" class="stat-number">0</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stat-card">
+                        <div class="card-icon">📅</div>
+                        <div>
+                            <h3>Total Events</h3>
+                            <p id="totalEvents" class="stat-number">0</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stat-card">
+                        <div class="card-icon">👥</div>
+                        <div>
+                            <h3>Participation</h3>
+                            <p id="totalParticipation" class="stat-number">0</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stat-card" style="border-color: var(--accent-blue);">
+                        <div class="card-icon" style="color: var(--accent-blue);">⭐</div>
+                        <div>
+                            <h3>Overall Score</h3>
+                            <p id="overallScore" class="stat-number" style="color: var(--accent-blue);">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analyticsGrid mt-40">
+                    <div class="glass-card chartCard">
+                        <h3>Club Performance Breakdown</h3>
+                        <div class="chart-container">
+                            <canvas id="clubScoreChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chartCard">
+                        <h3>Event Participation Trend</h3>
+                        <div class="chart-container">
+                            <canvas id="eventTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DEPARTMENTS SECTION -->
+            <section id="departments">
+                <div class="records-header">
+                    <h2 class="section-title" style="margin-bottom: 0;">Department Performance</h2>
+                    <input type="text" id="searchDept" placeholder="Search departments..."
+                        class="glass-input filter-dropdown" oninput="renderDepartments()">
+                </div>
+
+                <div class="glass-panel mt-20 p-0 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Department Name</th>
+                                    <th>Performance Score</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="departmentsTableBody">
+                                <!-- Data populated by JS -->
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CLUBS SECTION -->
+            <section id="clubs">
+                <div class="records-header">
+                    <h2 class="section-title" style="margin-bottom: 0;">Clubs Directory</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="filterClubDept" class="glass-input filter-dropdown" onchange="renderClubs()">
+                            <option value="All">All Departments</option>
+                        </select>
+                        <input type="text" id="searchClub" placeholder="Search clubs..."
+                            class="glass-input filter-dropdown" oninput="renderClubs()">
+                    </div>
+                </div>
+
+                <div id="advancedClubFilters" style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+                    <button class="clubTag toggle-tag active-tag btn-glass" onclick="setClubCategory('All', this)"
+                        style="border-width:2px; padding: 6px 15px; cursor: pointer; color: var(--text-main); font-size: 0.85rem; opacity: 1;">All</button>
+                    <button class="clubTag coding-tag toggle-tag" onclick="setClubCategory('Coding', this)"
+                        style="cursor: pointer; opacity: 0.6; font-size: 0.85rem;">Coding</button>
+                    <button class="clubTag robotics-tag toggle-tag" onclick="setClubCategory('Robotics', this)"
+                        style="cursor: pointer; opacity: 0.6; font-size: 0.85rem;">Robotics</button>
+                    <button class="clubTag cultural-tag toggle-tag" onclick="setClubCategory('Cultural', this)"
+                        style="cursor: pointer; opacity: 0.6; font-size: 0.85rem;">Cultural</button>
+                    <button class="clubTag sports-tag toggle-tag" onclick="setClubCategory('Sports', this)"
+                        style="cursor: pointer; opacity: 0.6; font-size: 0.85rem;">Sports</button>
+                    <button class="clubTag custom-purple-tag toggle-tag" onclick="setClubCategory('Other', this)"
+                        style="cursor: pointer; opacity: 0.6; font-size: 0.85rem;">Other</button>
+                </div>
+
+                <div class="cards mt-20" id="clubsGrid">
+                    <!-- Cards populated by JS -->
+                    <div class="text-center text-muted full-width">Loading clubs...</div>
+                </div>
+            </section>
+
+            <!-- EVENTS SECTION -->
+            <section id="events">
+                <div class="records-header">
+                    <h2 class="section-title" style="margin-bottom: 0;">Event Management</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-glass" onclick="toggleEventView()" id="eventViewToggleBtn"
+                            style="padding: 10px; border-color: var(--accent-blue); display: flex; align-items: center; justify-content: center; width: 160px;">📅
+                            Calendar View</button>
+                        <select id="filterEventClub" class="glass-input filter-dropdown" onchange="renderEvents()">
+                            <option value="All">All Clubs</option>
+                        </select>
+                        <input type="text" id="searchEvent" placeholder="Search events..."
+                            class="glass-input filter-dropdown" oninput="renderEvents()">
+                    </div>
+                </div>
+
+                <div id="eventsTableView" class="glass-panel mt-20 p-0 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Club</th>
+                                    <th>Date</th>
+                                    <th>Participants</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTableBody">
+                                <!-- Data populated by JS -->
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="eventsCalendarView" class="glass-panel mt-20"
+                    style="display: none; height: 600px; padding: 20px;">
+                    <div id="calendar" style="height: 100%;"></div>
+                </div>
+            </section>
+
+            <!-- DEPARTMENT DETAILS SECTION (NEW) -->
+            <section id="department-details">
+                <div class="records-header" style="justify-content: flex-start; gap: 20px;">
+                    <button class="btn btn-glass"
+                        onclick="showSection('departments', document.querySelector('.topNav li:nth-child(2)'))"
+                        style="padding: 10px 15px;">⬅ Back to Departments</button>
+                    <h2 class="section-title" id="detailDeptName" style="margin-bottom: 0;">Department Name</h2>
+                </div>
+
+                <div class="cards mt-20">
+                    <div class="glass-card stat-card" style="border-color: var(--accent-purple);">
+                        <div class="card-icon" style="color: var(--accent-purple);">🏅</div>
+                        <div>
+                            <h3>Performance Score</h3>
+                            <p id="detailDeptScore" class="stat-number" style="color: var(--accent-purple);">0/100</p>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="card-icon">🏕️</div>
+                        <div>
+                            <h3>Associated Clubs</h3>
+                            <p id="detailDeptClubCount" class="stat-number">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="panel-title mt-40">Clubs inside this Department</h3>
+                <div class="cards" id="detailClubsGrid">
+                    <!-- Cards populated via JS -->
+                </div>
+            </section>
+
+            <!-- LEADERBOARD SECTION -->
+            <section id="leaderboard">
+                <h2 class="section-title text-center">🏆 Leaderboards & Rankings</h2>
+
+                <div class="analyticsGrid">
+                    <!-- Top Clubs -->
+                    <div class="glass-panel">
+                        <h3 class="panel-title" style="color: var(--accent-blue);">Top Performing Clubs</h3>
+                        <ul class="newsList" id="topClubsList">
+                            <li><span class="text-muted">Loading...</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Top Departments -->
+                    <div class="glass-panel">
+                        <h3 class="panel-title" style="color: var(--accent-purple);">Top Performing Departments</h3>
+                        <ul class="newsList" id="topDeptsList">
+                            <li><span class="text-muted">Loading...</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="cards mt-30">
+                    <div class="glass-card stat-card">
+                        <div class="card-icon" style="color: #ffa502;">🔥</div>
+                        <div>
+                            <h3>Most Active Club</h3>
+                            <p id="mostActiveClub" style="font-size: 1.5rem; font-weight: 700;">-</p>
+                            <p id="mostActiveClubDesc" class="text-muted" style="font-size: 0.85rem;">0 events</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stat-card">
+                        <div class="card-icon" style="color: #2ed573;">📈</div>
+                        <div>
+                            <h3>Highest Participation Event</h3>
+                            <p id="topEvent" style="font-size: 1.5rem; font-weight: 700;">-</p>
+                            <p id="topEventDesc" class="text-muted" style="font-size: 0.85rem;">0 participants</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ADMIN SECTION -->
+            <section id="admin">
+                <h2 class="section-title">Admin Management</h2>
+
+                <div class="form-wrapper">
+                    <!-- Add Department Form -->
+                    <form id="deptForm" class="glass-panel mb-30">
+                        <h3 class="form-title">Add New Department</h3>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label>Department Name</label>
+                                <input type="text" id="newDeptName" class="glass-input" required>
+                            </div>
+                            <div class="input-group full-width">
+                                <label>Initial Performance Score</label>
+                                <input type="number" id="newDeptScore" class="glass-input" value="0" min="0" max="100"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="form-actions mt-20">
+                            <button type="submit" class="btn btn-primary"
+                                style="background: linear-gradient(135deg, var(--accent-purple), var(--bg-light));">Save
+                                Department</button>
+                        </div>
+                    </form>
+
+                    <!-- Add Club Form -->
+                    <form id="clubForm" class="glass-panel mb-30">
+                        <h3 class="form-title">Add New Club</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Club Name</label>
+                                <input type="text" id="newClubName" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Department</label>
+                                <select id="newClubDeptId" class="glass-input" required>
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Faculty Advisor</label>
+                                <input type="text" id="newClubAdvisor" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Category</label>
+                                <select id="newClubCategory" class="glass-input" required>
+                                    <option>Technical</option>
+                                    <option>Cultural</option>
+                                    <option>Sports</option>
+                                    <option>Academic</option>
+                                    <option>Social</option>
+                                </select>
+                            </div>
+                            <div class="input-group full-width">
+                                <label>Initial Performance Score</label>
+                                <input type="number" id="newClubScore" class="glass-input" value="0" min="0" max="100"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="form-actions mt-20">
+                            <button type="submit" class="btn btn-primary">Save Club</button>
+                        </div>
+                    </form>
+
+                    <!-- Add Event Form -->
+                    <form id="eventForm" class="glass-panel">
+                        <h3 class="form-title">Add New Event</h3>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label>Event Name</label>
+                                <input type="text" id="newEventName" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Organizing Club</label>
+                                <select id="newEventClubId" class="glass-input" required>
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Date</label>
+                                <input type="date" id="newEventDate" class="glass-input" required>
+                            </div>
+                            <div class="input-group full-width">
+                                <label>Description</label>
+                                <textarea id="newEventDesc" class="glass-input" rows="3" required></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label>Initial Participants</label>
+                                <input type="number" id="newEventParticipants" class="glass-input" value="0" min="0"
+                                    required>
+                            </div>
+                            <div class="input-group">
+                                <label>Event Image Attachment</label>
+                                <input type="file" id="newEventImage" class="glass-input" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="form-actions mt-20">
+                            <button type="submit" class="btn btn-primary"
+                                style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue)); color: #000;">Create
+                                Event</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- REPORTS SECTION -->
+            <section id="reports">
+                <h2 class="section-title text-center">Data Reports & Export</h2>
+
+                <div class="cards" style="max-width: 800px; margin: 0 auto;">
+                    <div class="glass-card text-center"
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
+                        <div class="card-icon" style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Export Events Data</h3>
+                        <p class="text-muted" style="margin-bottom: 30px;">Download a complete CSV report of all events,
+                            organized clubs, dates, and participation metrics.</p>
+                        <button class="btn btn-primary" onclick="exportEventsCSV()">Download CSV Report</button>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 20px; text-align: center;">Record Student Participation</h3>
+                        <form id="participationForm" style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="input-group">
+                                <label>Student Identifier (ID/Email)</label>
+                                <input type="text" id="partStudentId" class="glass-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Select Event</label>
+                                <select id="partEventId" class="glass-input" required>
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-glass" style="margin-top: 10px;">Record
+                                Participation</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- USER PROFILE SECTION (NEW) -->
+            <section id="profile">
+                <div class="records-header">
+                    <h2 class="section-title" style="margin-bottom: 0;">My Profile</h2>
+                </div>
+
+                <div class="cards mt-20">
+                    <div class="glass-card stat-card"
+                        style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                        <h3 style="font-size: 1.5rem; color: var(--text-main); font-weight: 700;">Student User</h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem;">Software Engineering, Year 2</p>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <span class="clubTag coding-tag" style="font-size: 0.85rem;">🏆 Hackathon Winner</span>
+                            <span class="clubTag cultural-tag" style="font-size: 0.85rem;">🌟 Drama Star</span>
+                            <span class="clubTag custom-purple-tag" style="font-size: 0.85rem;">📊 Data Lead</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stat-card" style="flex-direction: column; align-items: flex-start;">
+                        <h3 style="color: var(--text-main); font-weight: 600; margin-bottom: 10px;">Recent Activity</h3>
+                        <ul class="newsList" style="width: 100%;">
+                            <li><span class="news-text" style="color: var(--text-main);">Attended: Machine Learning
+                                    Workshop</span></li>
+                            <li><span class="news-text" style="color: var(--text-main);">Registered: Spring
+                                    Festival</span></li>
+                            <li><span class="news-text" style="color: var(--text-main);">Won: Inter-college Coding
+                                    Competition</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2026 Club & Department Performance System | Built with Node.js & SQLite</p>
+        </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">Action successful!</div>
+
+    <script src="dashboard-script.js"></script>
+</body>
+
+</html>
